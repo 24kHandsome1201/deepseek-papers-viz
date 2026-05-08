@@ -13,7 +13,7 @@ export default function FlagshipGrid() {
   );
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-12">
+    <section className="max-w-[1480px] mx-auto px-4 sm:px-6 py-14">
       <div className="mb-6">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">
           <Star size={12} />

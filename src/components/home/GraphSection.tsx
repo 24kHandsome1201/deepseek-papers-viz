@@ -27,25 +27,27 @@ export default function GraphSection() {
       id="graph"
       className="border-t border-[var(--border)] bg-[var(--panel)]/20"
     >
-      <div className="max-w-7xl mx-auto px-6 pt-12 pb-16">
-        <div className="flex items-end justify-between mb-5 flex-wrap gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">
-              <Compass size={12} />
-              Full Graph
+      <div className="px-4 sm:px-6 pt-14 pb-20">
+        <div className="max-w-[1480px] mx-auto mb-6">
+          <div className="flex items-end justify-between flex-wrap gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">
+                <Compass size={12} />
+                Full Graph
+              </div>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                全景知识图谱
+              </h2>
+              <p className="text-sm text-[var(--muted)] mt-1 max-w-2xl leading-relaxed">
+                横轴 = 时间 · 纵轴 = 团队 · 连线 = 技术继承。
+                单击节点看摘要，双击进入详情；★ = 旗舰，
+                <span className="text-emerald-400"> 绿色脉冲</span> = 90 天内的最新发布。
+              </p>
             </div>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-              全景知识图谱
-            </h2>
-            <p className="text-sm text-[var(--muted)] mt-1 max-w-2xl leading-relaxed">
-              横轴 = 时间 · 纵轴 = 团队 · 连线 = 技术继承。
-              单击节点查看摘要，双击进入详情；★ = 旗舰，
-              <span className="text-emerald-400"> 绿色脉冲</span> = 90 天内的最新发布。
-            </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--panel)]/70 backdrop-blur p-4">
+        <div className="max-w-[1480px] mx-auto rounded-2xl border border-[var(--border)] bg-[var(--panel)]/70 backdrop-blur p-4">
           <div className="flex items-center gap-3 flex-wrap mb-3">
             <span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">
               筛选团队
@@ -53,7 +55,7 @@ export default function GraphSection() {
             <TeamFilter active={active} onChange={setActive} />
           </div>
 
-          <div className="relative rounded-xl border border-[var(--border)] bg-[var(--background)]/40">
+          <div className="relative rounded-xl border border-[var(--border)] bg-[var(--background)]/40 overflow-hidden">
             <KnowledgeGraph
               activeTeams={active}
               onSelect={setSelected}
@@ -66,7 +68,7 @@ export default function GraphSection() {
           </div>
 
           <div className="mt-3 flex items-center justify-between flex-wrap gap-2 text-[10px] text-[var(--muted)]">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="inline-flex items-center gap-1.5">
                 <span className="text-yellow-300">★</span> Flagship
               </span>
@@ -81,7 +83,7 @@ export default function GraphSection() {
             </div>
             <span>
               <Maximize2 size={11} className="inline mr-1" />
-              页面宽度不足时可横向滚动
+              内容过宽时可横向滚动
             </span>
           </div>
         </div>

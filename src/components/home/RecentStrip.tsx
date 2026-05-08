@@ -29,7 +29,7 @@ export default function RecentStrip() {
 
   return (
     <section className="border-t border-[var(--border)] bg-[var(--panel)]/30">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-[1480px] mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-end justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">

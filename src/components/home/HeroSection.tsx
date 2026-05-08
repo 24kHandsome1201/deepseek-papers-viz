@@ -20,7 +20,7 @@ export default function HeroSection() {
         backgroundSize: "44px 44px",
       }} />
 
-      <div className="max-w-6xl mx-auto px-6 pt-14 pb-12">
+      <div className="max-w-[1480px] mx-auto px-4 sm:px-6 pt-16 pb-14">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

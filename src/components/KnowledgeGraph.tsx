@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { PAPERS, Paper } from "@/data/papers";
@@ -13,22 +13,32 @@ interface Props {
   selectedId: string | null;
 }
 
-const TODAY = new Date("2026-05-08");
-const ROW_H = 78;
-const NODE_R_FLAGSHIP = 24;
-const NODE_R = 9;
+const TODAY = new Date("2026-05-09");
+const ROW_H = 130;
+const NODE_R_FLAGSHIP = 22;
+const NODE_R = 8;
 const NODE_R_STUB = 7;
-const PADDING_L = 132;
-const PADDING_R = 60;
-const PADDING_T = 36;
-const PADDING_B = 56;
+const PADDING_L = 156;
+const PADDING_R = 80;
+const PADDING_T = 44;
+const PADDING_B = 64;
+const W = 1680;
+const COLLISION_PX = 80;
+const SLOT_OFFSETS = [0, -34, 34, -68, 68]; // px from row center
+
+interface NodePos {
+  paper: Paper;
+  cx: number;
+  cy: number;
+  slot: number;
+  labelBelow: boolean;
+}
 
 export default function KnowledgeGraph({
   activeTeams,
   onSelect,
   selectedId,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [hover, setHover] = useState<{
     paper: Paper;
@@ -46,40 +56,68 @@ export default function KnowledgeGraph({
     const allDates = visible.map((p) => +new Date(p.date));
     const minDate = Math.min(...allDates, +new Date("2024-01-01"));
     const maxDate = Math.max(...allDates, TODAY.getTime());
+    const span = maxDate - minDate || 1;
 
-    const W = 1180;
     const H = teamIds.length * ROW_H + PADDING_T + PADDING_B;
 
     const xFor = (iso: string) => {
       const t = +new Date(iso);
       return (
-        PADDING_L +
-        ((t - minDate) / (maxDate - minDate)) * (W - PADDING_L - PADDING_R)
+        PADDING_L + ((t - minDate) / span) * (W - PADDING_L - PADDING_R)
       );
     };
-    const yFor = (team: string) =>
+    const teamCenterY = (team: string) =>
       PADDING_T + (teamRow[team] + 0.5) * ROW_H;
+
+    // Compute node positions with collision avoidance per team
+    const positions = new Map<string, NodePos>();
+    for (const tid of teamIds) {
+      const teamPapers = visible
+        .filter((p) => p.team === tid)
+        .sort((a, b) => +new Date(a.date) - +new Date(b.date));
+      // walk through and assign slots based on x distance to previous
+      const placed: NodePos[] = [];
+      for (const p of teamPapers) {
+        const cx = xFor(p.date);
+        // pick smallest slot whose nearest previous-slot neighbor is far enough
+        let chosen = 0;
+        for (let s = 0; s < SLOT_OFFSETS.length; s++) {
+          const ok = placed.every(
+            (q) =>
+              q.slot !== s ||
+              Math.abs(q.cx - cx) >= COLLISION_PX
+          );
+          if (ok) {
+            chosen = s;
+            break;
+          }
+        }
+        const cy = teamCenterY(tid) + SLOT_OFFSETS[chosen];
+        const labelBelow = SLOT_OFFSETS[chosen] <= 0; // above-center → label below
+        const pos: NodePos = { paper: p, cx, cy, slot: chosen, labelBelow };
+        placed.push(pos);
+        positions.set(p.id, pos);
+      }
+    }
 
     // Year ticks
     const startYear = new Date(minDate).getFullYear();
     const endYear = new Date(maxDate).getFullYear();
-    const yearTicks: { label: string; x: number }[] = [];
-    for (let y = startYear; y <= endYear; y++) {
-      // Q1 of each year + Q3
-      const quarters = [`${y}-01-01`, `${y}-07-01`];
-      quarters.forEach((q) => {
+    const yearTicks: { label: string; x: number; major: boolean }[] = [];
+    for (let y = startYear; y <= endYear + 1; y++) {
+      for (const m of [1, 4, 7, 10]) {
+        const q = `${y}-${String(m).padStart(2, "0")}-01`;
         const qt = +new Date(q);
-        if (qt >= minDate && qt <= maxDate) {
+        if (qt >= minDate && qt <= maxDate + 1000 * 60 * 60 * 24 * 30) {
           yearTicks.push({
-            label:
-              q.endsWith("01-01") ? `${y}` : `${y} H2`,
+            label: m === 1 ? `${y}` : `${m === 4 ? "Q2" : m === 7 ? "Q3" : "Q4"}`,
             x: xFor(q),
+            major: m === 1,
           });
         }
-      });
+      }
     }
 
-    // Today line
     const todayX = xFor(TODAY.toISOString().slice(0, 10));
 
     return {
@@ -88,15 +126,15 @@ export default function KnowledgeGraph({
       visible,
       teamIds,
       xFor,
-      yFor,
+      teamCenterY,
       yearTicks,
       todayX,
+      positions,
     };
   }, [activeTeams]);
 
   const visibleIds = new Set(layout.visible.map((p) => p.id));
 
-  // selected neighborhood
   const selectedPaper = selectedId
     ? PAPERS.find((p) => p.id === selectedId)
     : null;
@@ -116,17 +154,25 @@ export default function KnowledgeGraph({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-auto scrollbar-thin">
+    <div className="relative w-full overflow-x-auto overflow-y-hidden scrollbar-thin">
       <svg
         viewBox={`0 0 ${layout.W} ${layout.H}`}
-        className="w-full"
-        style={{ minWidth: 760, height: layout.H }}
+        width={layout.W}
+        height={layout.H}
+        preserveAspectRatio="xMinYMin meet"
+        style={{ maxWidth: "none", display: "block" }}
+        className="select-none"
         onClick={(e) => {
           if (e.target === e.currentTarget) onSelect(null);
         }}
       >
         <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <pattern
+            id="grid"
+            width="40"
+            height="40"
+            patternUnits="userSpaceOnUse"
+          >
             <path
               d="M 40 0 L 0 0 0 40"
               fill="none"
@@ -135,7 +181,7 @@ export default function KnowledgeGraph({
             />
           </pattern>
           <radialGradient id="flagshipGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+            <stop offset="0%" stopColor="white" stopOpacity="0.22" />
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </radialGradient>
         </defs>
@@ -148,18 +194,17 @@ export default function KnowledgeGraph({
           return (
             <g key={tid}>
               <rect
-                x={PADDING_L - 8}
+                x={PADDING_L - 12}
                 y={PADDING_T + i * ROW_H}
-                width={layout.W - PADDING_L - PADDING_R + 16}
+                width={layout.W - PADDING_L - PADDING_R + 24}
                 height={ROW_H}
-                fill={i % 2 === 0 ? "rgba(255,255,255,0.012)" : "transparent"}
+                fill={i % 2 === 0 ? "rgba(255,255,255,0.014)" : "transparent"}
               />
-              {/* team label on the left */}
               <foreignObject
-                x={8}
-                y={PADDING_T + i * ROW_H + ROW_H / 2 - 16}
-                width={PADDING_L - 16}
-                height={32}
+                x={10}
+                y={PADDING_T + i * ROW_H + ROW_H / 2 - 18}
+                width={PADDING_L - 22}
+                height={36}
               >
                 <div className="flex items-center gap-2 h-full">
                   <span
@@ -179,13 +224,12 @@ export default function KnowledgeGraph({
                   </div>
                 </div>
               </foreignObject>
-              {/* lane separator */}
               <line
-                x1={PADDING_L - 8}
+                x1={PADDING_L - 12}
                 x2={layout.W - PADDING_R}
                 y1={PADDING_T + (i + 1) * ROW_H}
                 y2={PADDING_T + (i + 1) * ROW_H}
-                stroke="rgba(255,255,255,0.04)"
+                stroke="rgba(255,255,255,0.05)"
                 strokeWidth="1"
               />
             </g>
@@ -198,25 +242,32 @@ export default function KnowledgeGraph({
           x2={layout.W - PADDING_R}
           y1={layout.H - PADDING_B + 14}
           y2={layout.H - PADDING_B + 14}
-          stroke="rgba(255,255,255,0.1)"
+          stroke="rgba(255,255,255,0.12)"
           strokeWidth="1"
         />
-        {layout.yearTicks.map((t) => (
-          <g key={t.label}>
+        {layout.yearTicks.map((t, i) => (
+          <g key={`${t.label}-${i}`}>
             <line
               x1={t.x}
               x2={t.x}
               y1={PADDING_T - 8}
               y2={layout.H - PADDING_B + 14}
-              stroke="rgba(255,255,255,0.04)"
+              stroke={
+                t.major ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)"
+              }
               strokeWidth="1"
-              strokeDasharray="3 4"
+              strokeDasharray={t.major ? "0" : "3 4"}
             />
             <text
               x={t.x}
-              y={layout.H - PADDING_B + 30}
+              y={layout.H - PADDING_B + 32}
               textAnchor="middle"
-              className="text-[10px] fill-[var(--muted)] font-mono"
+              className={t.major ? "fill-white" : "fill-[var(--muted)]"}
+              style={{
+                fontSize: t.major ? 12 : 9,
+                fontWeight: t.major ? 600 : 400,
+                fontFamily: "var(--font-geist-mono)",
+              }}
             >
               {t.label}
             </text>
@@ -229,14 +280,15 @@ export default function KnowledgeGraph({
           x2={layout.todayX}
           y1={PADDING_T - 8}
           y2={layout.H - PADDING_B + 14}
-          stroke="rgba(52, 211, 153, 0.5)"
+          stroke="rgba(52, 211, 153, 0.55)"
           strokeWidth="1.5"
           strokeDasharray="2 4"
         />
         <text
-          x={layout.todayX + 4}
+          x={layout.todayX + 6}
           y={PADDING_T - 12}
-          className="text-[10px] fill-emerald-400 font-mono"
+          className="fill-emerald-400"
+          style={{ fontSize: 10, fontFamily: "var(--font-geist-mono)" }}
         >
           NOW
         </text>
@@ -246,27 +298,25 @@ export default function KnowledgeGraph({
           p.buildsOn
             .filter((b) => visibleIds.has(b))
             .map((b) => {
-              const src = PAPERS.find((x) => x.id === b)!;
-              const x1 = layout.xFor(src.date);
-              const y1 = layout.yFor(src.team);
-              const x2 = layout.xFor(p.date);
-              const y2 = layout.yFor(p.team);
+              const srcPos = layout.positions.get(b);
+              const tgtPos = layout.positions.get(p.id);
+              if (!srcPos || !tgtPos) return null;
               const team = TEAMS[p.team];
               const isHi =
                 neighborhood &&
                 neighborhood.has(p.id) &&
                 neighborhood.has(b);
               const isDim = neighborhood && !isHi;
-              const cx = (x1 + x2) / 2;
-              const cy = (y1 + y2) / 2 - 18;
+              const cx = (srcPos.cx + tgtPos.cx) / 2;
+              const cy = (srcPos.cy + tgtPos.cy) / 2 - 22;
               return (
                 <path
                   key={`${b}->${p.id}`}
-                  d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`}
+                  d={`M ${srcPos.cx} ${srcPos.cy} Q ${cx} ${cy} ${tgtPos.cx} ${tgtPos.cy}`}
                   fill="none"
                   stroke={team.color}
-                  strokeOpacity={isDim ? 0.06 : isHi ? 0.95 : 0.35}
-                  strokeWidth={isHi ? 2.5 : 1.5}
+                  strokeOpacity={isDim ? 0.05 : isHi ? 0.95 : 0.32}
+                  strokeWidth={isHi ? 2.5 : 1.4}
                 />
               );
             })
@@ -274,20 +324,28 @@ export default function KnowledgeGraph({
 
         {/* nodes */}
         {layout.visible.map((p) => {
+          const pos = layout.positions.get(p.id);
+          if (!pos) return null;
           const team = TEAMS[p.team];
-          const cx = layout.xFor(p.date);
-          const cy = layout.yFor(p.team);
+          const cx = pos.cx;
+          const cy = pos.cy;
           const isFlagship = p.tier === "flagship";
           const r = isFlagship
             ? NODE_R_FLAGSHIP
             : p.tier === "stub"
               ? NODE_R_STUB
               : NODE_R;
-          const days =
-            (TODAY.getTime() - +new Date(p.date)) / 86400000;
+          const days = (TODAY.getTime() - +new Date(p.date)) / 86400000;
           const isFresh = days < 90;
           const dim = isDimmed(p.id);
           const sel = selectedId === p.id;
+          const labelY = pos.labelBelow ? cy + r + 14 : cy - r - 8;
+          const labelText = p.titleZh ?? p.title.split(":")[0];
+          const limit = isFlagship ? 22 : 14;
+          const shortLabel =
+            labelText.length > limit
+              ? labelText.slice(0, limit - 1) + "…"
+              : labelText;
 
           return (
             <g
@@ -302,7 +360,6 @@ export default function KnowledgeGraph({
               }}
               onDoubleClick={() => router.push(`/paper/${p.id}`)}
             >
-              {/* fresh pulse */}
               {isFresh && !dim && (
                 <circle
                   cx={cx}
@@ -311,22 +368,15 @@ export default function KnowledgeGraph({
                   fill="none"
                   stroke="#34D399"
                   strokeWidth="1.5"
-                  opacity="0.55"
-                  className="origin-center"
+                  opacity="0.6"
                   style={{
                     transformOrigin: `${cx}px ${cy}px`,
                     animation: "pulseRing 2.2s ease-out infinite",
                   }}
                 />
               )}
-              {/* flagship halo */}
               {isFlagship && (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={r + 14}
-                  fill="url(#flagshipGlow)"
-                />
+                <circle cx={cx} cy={cy} r={r + 16} fill="url(#flagshipGlow)" />
               )}
               <circle
                 cx={cx}
@@ -337,34 +387,38 @@ export default function KnowledgeGraph({
                 strokeWidth={sel ? 3 : isFlagship ? 3 : 1.5}
                 strokeOpacity={sel ? 1 : 0.6}
               />
-
-              {/* flagship inner star */}
               {isFlagship && (
                 <text
                   x={cx}
                   y={cy + 4}
                   textAnchor="middle"
                   className="fill-white"
-                  style={{ fontSize: 14, fontWeight: 700 }}
+                  style={{ fontSize: 13, fontWeight: 700 }}
                 >
                   ★
                 </text>
               )}
-
-              {/* label */}
-              <text
-                x={cx}
-                y={cy + r + 14}
-                textAnchor="middle"
-                className="fill-[var(--foreground)]"
-                style={{
-                  fontSize: isFlagship ? 12 : 10,
-                  fontWeight: isFlagship ? 600 : 400,
-                  pointerEvents: "none",
-                }}
-              >
-                <ShortLabel text={p.titleZh ?? p.title.split(":")[0]} flagship={isFlagship} />
-              </text>
+              {/* label background pill for readability */}
+              {!dim && (
+                <text
+                  x={cx}
+                  y={labelY}
+                  textAnchor="middle"
+                  className="fill-[var(--foreground)]"
+                  style={{
+                    fontSize: isFlagship ? 11.5 : 10,
+                    fontWeight: isFlagship ? 600 : 400,
+                    pointerEvents: "none",
+                    paintOrder: "stroke",
+                    stroke: "#08090f",
+                    strokeWidth: 3,
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                  }}
+                >
+                  {shortLabel}
+                </text>
+              )}
             </g>
           );
         })}
@@ -376,6 +430,7 @@ export default function KnowledgeGraph({
           cx={hover.cx}
           cy={hover.cy}
           containerWidth={layout.W}
+          containerHeight={layout.H}
         />
       )}
 
@@ -383,14 +438,14 @@ export default function KnowledgeGraph({
         @keyframes pulseRing {
           0% {
             transform: scale(1);
-            opacity: 0.55;
+            opacity: 0.6;
           }
           80% {
-            transform: scale(1.8);
+            transform: scale(1.9);
             opacity: 0;
           }
           100% {
-            transform: scale(1.8);
+            transform: scale(1.9);
             opacity: 0;
           }
         }
@@ -399,25 +454,21 @@ export default function KnowledgeGraph({
   );
 }
 
-function ShortLabel({ text, flagship }: { text: string; flagship: boolean }) {
-  const limit = flagship ? 24 : 16;
-  return text.length > limit ? text.slice(0, limit - 1) + "…" : text;
-}
-
 function HoverCard({
   paper,
   cx,
   cy,
   containerWidth,
+  containerHeight,
 }: {
   paper: Paper;
   cx: number;
   cy: number;
   containerWidth: number;
+  containerHeight: number;
 }) {
   const team = TEAMS[paper.team];
-  const flipLeft = cx > containerWidth - 320;
-  const left = (cx / containerWidth) * 100;
+  const flipLeft = cx > containerWidth - 360;
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
@@ -425,8 +476,8 @@ function HoverCard({
       transition={{ duration: 0.15 }}
       style={{
         position: "absolute",
-        left: `${left}%`,
-        top: cy,
+        left: `${(cx / containerWidth) * 100}%`,
+        top: `${(cy / containerHeight) * 100}%`,
         transform: `translate(${flipLeft ? "calc(-100% - 24px)" : "24px"}, -50%)`,
       }}
       className="pointer-events-none z-30 max-w-[320px] rounded-xl border border-[var(--border)] bg-[var(--panel-elev)]/95 backdrop-blur-md px-3 py-2 shadow-2xl"
