@@ -72,4 +72,20 @@ export const TEAMS: Record<string, Team> = {
     accent: "#C58CFF",
     org: "上海 AI 实验室",
   },
+  tencent: {
+    id: "tencent",
+    name: "腾讯混元",
+    nameEn: "Hunyuan",
+    color: "#00A0E9",
+    accent: "#5AC4F2",
+    org: "腾讯",
+  },
+  minimax: {
+    id: "minimax",
+    name: "MiniMax",
+    nameEn: "MiniMax",
+    color: "#E84D8A",
+    accent: "#FF7AAB",
+    org: "稀宇科技",
+  },
 };

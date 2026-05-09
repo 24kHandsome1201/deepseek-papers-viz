@@ -86,9 +86,9 @@ export default function KimiK15Demo() {
           smooth: true,
           symbolSize: 6,
           data: RL_CURVE_DATA.map((d) => d.math),
-          lineStyle: { color: "#1F1F1F", width: 2 },
-          itemStyle: { color: "#1F1F1F" },
-          areaStyle: { color: "rgba(31,31,31,0.15)" },
+          lineStyle: { color: "#F2994A", width: 2 },
+          itemStyle: { color: "#F2994A" },
+          areaStyle: { color: "rgba(242,153,74,0.15)" },
         },
         {
           name: "代码",
