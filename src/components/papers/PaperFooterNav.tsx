@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { PAPERS } from "@/data/papers";
+import { PAPERS, paperById } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
 
 interface Props {
@@ -10,12 +10,13 @@ interface Props {
 }
 
 export default function PaperFooterNav({ currentId }: Props) {
-  const dsPapers = PAPERS.filter((p) => p.team === "deepseek").sort(
+  const current = paperById(currentId);
+  const teamPapers = PAPERS.filter((p) => p.team === current?.team).sort(
     (a, b) => +new Date(a.date) - +new Date(b.date)
   );
-  const idx = dsPapers.findIndex((p) => p.id === currentId);
-  const prev = idx > 0 ? dsPapers[idx - 1] : null;
-  const next = idx < dsPapers.length - 1 ? dsPapers[idx + 1] : null;
+  const idx = teamPapers.findIndex((p) => p.id === currentId);
+  const prev = idx > 0 ? teamPapers[idx - 1] : null;
+  const next = idx < teamPapers.length - 1 ? teamPapers[idx + 1] : null;
 
   return (
     <footer className="border-t border-[var(--border)] mt-10">
@@ -65,7 +66,7 @@ export default function PaperFooterNav({ currentId }: Props) {
               <ArrowRight size={12} />
             </div>
             <div className="mt-2 text-sm font-semibold leading-snug group-hover:text-white">
-              探索更多 DeepSeek 论文
+              探索更多论文
             </div>
           </Link>
         )}

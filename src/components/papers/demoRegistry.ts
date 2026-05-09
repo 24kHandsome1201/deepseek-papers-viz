@@ -32,6 +32,31 @@ export const PAPER_DEMOS: Record<string, ComponentType> = {
   "deepseek-v4": dynamic(() => import("@/components/papers/demos/V4Demo"), {
     loading: Loading,
   }),
+  // Other open-source teams
+  "qwen3": dynamic(
+    () => import("@/components/papers/demos/Qwen3ThinkingBudgetDemo"),
+    { loading: Loading }
+  ),
+  "kimi-k2": dynamic(
+    () => import("@/components/papers/demos/MuonClipDemo"),
+    { loading: Loading }
+  ),
+  "glm-4-5": dynamic(
+    () => import("@/components/papers/demos/GLMArcRadarDemo"),
+    { loading: Loading }
+  ),
+  "minicpm-4": dynamic(
+    () => import("@/components/papers/demos/InfLLMv2Demo"),
+    { loading: Loading }
+  ),
+  "deepseek-ocr": dynamic(
+    () => import("@/components/papers/demos/OpticalCompressionDemo"),
+    { loading: Loading }
+  ),
+  "janus-pro": dynamic(
+    () => import("@/components/papers/demos/JanusDecoupledDemo"),
+    { loading: Loading }
+  ),
 };
 
 export function hasDemo(id: string): boolean {
