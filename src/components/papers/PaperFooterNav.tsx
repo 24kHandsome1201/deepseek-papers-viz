@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { PAPERS } from "@/data/papers";
+import { PAPERS, paperById } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
 
 interface Props {
@@ -10,12 +10,14 @@ interface Props {
 }
 
 export default function PaperFooterNav({ currentId }: Props) {
-  const dsPapers = PAPERS.filter((p) => p.team === "deepseek").sort(
+  const current = paperById(currentId);
+  const teamId = current?.team ?? "deepseek";
+  const teamPapers = PAPERS.filter((p) => p.team === teamId).sort(
     (a, b) => +new Date(a.date) - +new Date(b.date)
   );
-  const idx = dsPapers.findIndex((p) => p.id === currentId);
-  const prev = idx > 0 ? dsPapers[idx - 1] : null;
-  const next = idx < dsPapers.length - 1 ? dsPapers[idx + 1] : null;
+  const idx = teamPapers.findIndex((p) => p.id === currentId);
+  const prev = idx > 0 ? teamPapers[idx - 1] : null;
+  const next = idx >= 0 && idx < teamPapers.length - 1 ? teamPapers[idx + 1] : null;
 
   return (
     <footer className="border-t border-[var(--border)] mt-10">
@@ -27,17 +29,26 @@ export default function PaperFooterNav({ currentId }: Props) {
           >
             <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
               <ArrowLeft size={12} />
-              上一篇
+              上一篇 · {TEAMS[prev.team].name}
             </div>
             <div className="mt-2 text-sm font-semibold leading-snug group-hover:text-white">
               {prev.titleZh ?? prev.title.split(":")[0]}
             </div>
-            <div className="text-xs text-[var(--muted)] mt-1">
-              {TEAMS[prev.team].name} · {prev.date}
-            </div>
+            <div className="text-xs text-[var(--muted)] mt-1">{prev.date}</div>
           </Link>
         ) : (
-          <div />
+          <Link
+            href="/"
+            className="group rounded-xl border border-[var(--border)] bg-[var(--panel)] p-4 hover:bg-[var(--panel-elev)] transition"
+          >
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
+              <ArrowLeft size={12} />
+              返回图谱
+            </div>
+            <div className="mt-2 text-sm font-semibold leading-snug group-hover:text-white">
+              探索更多团队
+            </div>
+          </Link>
         )}
         {next ? (
           <Link
@@ -45,15 +56,13 @@ export default function PaperFooterNav({ currentId }: Props) {
             className="group rounded-xl border border-[var(--border)] bg-[var(--panel)] p-4 hover:bg-[var(--panel-elev)] transition text-right"
           >
             <div className="flex items-center justify-end gap-1.5 text-[11px] text-[var(--muted)]">
-              下一篇
+              下一篇 · {TEAMS[next.team].name}
               <ArrowRight size={12} />
             </div>
             <div className="mt-2 text-sm font-semibold leading-snug group-hover:text-white">
               {next.titleZh ?? next.title.split(":")[0]}
             </div>
-            <div className="text-xs text-[var(--muted)] mt-1">
-              {TEAMS[next.team].name} · {next.date}
-            </div>
+            <div className="text-xs text-[var(--muted)] mt-1">{next.date}</div>
           </Link>
         ) : (
           <Link
@@ -65,7 +74,7 @@ export default function PaperFooterNav({ currentId }: Props) {
               <ArrowRight size={12} />
             </div>
             <div className="mt-2 text-sm font-semibold leading-snug group-hover:text-white">
-              探索更多 DeepSeek 论文
+              探索更多论文
             </div>
           </Link>
         )}

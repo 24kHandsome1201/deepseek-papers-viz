@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 const Loading = () => null;
 
 export const PAPER_DEMOS: Record<string, ComponentType> = {
+  // ============ DeepSeek 主线 ============
   "deepseek-llm": dynamic(
     () => import("@/components/papers/demos/ScalingLawsDemo"),
     { loading: Loading }
@@ -32,6 +33,44 @@ export const PAPER_DEMOS: Record<string, ComponentType> = {
   "deepseek-v4": dynamic(() => import("@/components/papers/demos/V4Demo"), {
     loading: Loading,
   }),
+
+  // ============ 其他团队 ============
+  qwen3: dynamic(() => import("@/components/papers/demos/Qwen3Demo"), {
+    loading: Loading,
+  }),
+  "qwen3-6": dynamic(() => import("@/components/papers/demos/Qwen36Demo"), {
+    loading: Loading,
+  }),
+  "qwen2-5": dynamic(() => import("@/components/papers/demos/Qwen25Demo"), {
+    loading: Loading,
+  }),
+  "kimi-k2": dynamic(() => import("@/components/papers/demos/KimiK2Demo"), {
+    loading: Loading,
+  }),
+  "kimi-k2-6": dynamic(() => import("@/components/papers/demos/KimiK26Demo"), {
+    loading: Loading,
+  }),
+  "kimi-k1-5": dynamic(() => import("@/components/papers/demos/KimiK15Demo"), {
+    loading: Loading,
+  }),
+  "glm-4-5": dynamic(() => import("@/components/papers/demos/GLM45Demo"), {
+    loading: Loading,
+  }),
+  "minicpm-3": dynamic(() => import("@/components/papers/demos/MiniCPMDemo"), {
+    loading: Loading,
+  }),
+  "yi-lightning": dynamic(
+    () => import("@/components/papers/demos/YiLightningDemo"),
+    { loading: Loading }
+  ),
+  "internlm-3": dynamic(
+    () => import("@/components/papers/demos/InternLM3Demo"),
+    { loading: Loading }
+  ),
+  "baichuan-omni": dynamic(
+    () => import("@/components/papers/demos/BaichuanOmniDemo"),
+    { loading: Loading }
+  ),
 };
 
 export function hasDemo(id: string): boolean {
