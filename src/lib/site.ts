@@ -6,3 +6,7 @@ export const SITE_DESCRIPTION =
 export function getReferenceDate() {
   return new Date();
 }
+
+export function toReferenceDate(value: string) {
+  return new Date(value);
+}

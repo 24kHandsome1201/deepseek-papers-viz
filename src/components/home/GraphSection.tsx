@@ -16,7 +16,11 @@ const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph"), {
   ),
 });
 
-export default function GraphSection() {
+interface Props {
+  referenceDate: string;
+}
+
+export default function GraphSection({ referenceDate }: Props) {
   const [active, setActive] = useState<Set<string>>(
     new Set(Object.keys(TEAMS))
   );
@@ -60,6 +64,7 @@ export default function GraphSection() {
               activeTeams={active}
               onSelect={setSelected}
               selectedId={selected}
+              referenceDate={referenceDate}
             />
             <PaperDrawer
               paperId={selected}

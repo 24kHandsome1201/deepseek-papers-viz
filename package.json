@@ -2,6 +2,7 @@
   "name": "deepseek-papers-viz",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "npm run validate:papers && next build",

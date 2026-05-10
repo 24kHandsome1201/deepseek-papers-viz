@@ -5,12 +5,16 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { PAPERS } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
-import { getReferenceDate } from "@/lib/site";
+import { toReferenceDate } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
 
-export default function RecentStrip() {
+interface Props {
+  referenceDate: string;
+}
+
+export default function RecentStrip({ referenceDate }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const today = getReferenceDate();
+  const today = toReferenceDate(referenceDate);
 
   const recent = PAPERS
     .filter((p) => {

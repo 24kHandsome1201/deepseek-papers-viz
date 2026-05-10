@@ -17,13 +17,19 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import type { Paper } from "../src/data/papers.ts";
+import type { Team } from "../src/data/teams.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
 // Import TS sources directly via Node's experimental TS strip.
-const { PAPERS } = await import(resolve(root, "src/data/papers.ts"));
-const { TEAMS } = await import(resolve(root, "src/data/teams.ts"));
+const { PAPERS } = (await import(resolve(root, "src/data/papers.ts"))) as {
+  PAPERS: Paper[];
+};
+const { TEAMS } = (await import(resolve(root, "src/data/teams.ts"))) as {
+  TEAMS: Record<string, Team>;
+};
 
 // demoRegistry.ts depends on `next/dynamic` which only resolves inside the Next
 // runtime, so parse it as text instead of importing it.
@@ -84,7 +90,7 @@ for (const id of demoIds) {
 // Surface counts so flat lists of papers tell us at a glance whether the
 // content extension work is regressing.
 const richCount = PAPERS.filter(
-  (p: any) => p.pipeline || p.keyTechniques || p.benchmarks || p.insights
+  (p) => p.pipeline || p.keyTechniques || p.benchmarks || p.insights
 ).length;
 
 const errs = issues.filter((i) => i.level === "error");

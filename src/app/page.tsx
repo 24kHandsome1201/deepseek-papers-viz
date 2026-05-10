@@ -2,14 +2,17 @@ import HeroSection from "@/components/home/HeroSection";
 import RecentStrip from "@/components/home/RecentStrip";
 import FlagshipGrid from "@/components/home/FlagshipGrid";
 import GraphSection from "@/components/home/GraphSection";
+import { getReferenceDate } from "@/lib/site";
 
 export default function HomePage() {
+  const referenceDate = getReferenceDate().toISOString();
+
   return (
     <main className="min-h-screen flex flex-col">
       <HeroSection />
-      <RecentStrip />
+      <RecentStrip referenceDate={referenceDate} />
       <FlagshipGrid />
-      <GraphSection />
+      <GraphSection referenceDate={referenceDate} />
       <Footer />
     </main>
   );

@@ -6,12 +6,13 @@ import { motion } from "framer-motion";
 import { PAPERS, Paper } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
 import { formatDate } from "@/lib/utils";
-import { getReferenceDate } from "@/lib/site";
+import { toReferenceDate } from "@/lib/site";
 
 interface Props {
   activeTeams: Set<string>;
   onSelect: (paperId: string | null) => void;
   selectedId: string | null;
+  referenceDate: string;
 }
 
 const ROW_H = 130;
@@ -38,6 +39,7 @@ export default function KnowledgeGraph({
   activeTeams,
   onSelect,
   selectedId,
+  referenceDate,
 }: Props) {
   const router = useRouter();
   const [hover, setHover] = useState<{
@@ -47,7 +49,7 @@ export default function KnowledgeGraph({
   } | null>(null);
 
   const layout = useMemo(() => {
-    const today = getReferenceDate();
+    const today = toReferenceDate(referenceDate);
     const visible = PAPERS.filter((p) => activeTeams.has(p.team));
     const teamIds = Array.from(activeTeams);
     const teamRow: Record<string, number> = {};
@@ -133,7 +135,7 @@ export default function KnowledgeGraph({
       positions,
       today,
     };
-  }, [activeTeams]);
+  }, [activeTeams, referenceDate]);
 
   const visibleIds = new Set(layout.visible.map((p) => p.id));
 
