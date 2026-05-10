@@ -5,17 +5,17 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { PAPERS } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
+import { getReferenceDate } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
-
-const TODAY = new Date("2026-05-08");
 
 export default function RecentStrip() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const today = getReferenceDate();
 
   const recent = PAPERS
     .filter((p) => {
       const d = new Date(p.date);
-      const days = (TODAY.getTime() - d.getTime()) / 86400000;
+      const days = (today.getTime() - d.getTime()) / 86400000;
       return days <= 365 * 1.2; // last ~14 months
     })
     .sort((a, b) => +new Date(b.date) - +new Date(a.date))
@@ -69,7 +69,7 @@ export default function RecentStrip() {
           {recent.map((p) => {
             const team = TEAMS[p.team];
             const days = Math.round(
-              (TODAY.getTime() - +new Date(p.date)) / 86400000
+              (today.getTime() - +new Date(p.date)) / 86400000
             );
             const isFlagship = p.tier === "flagship";
             const isFresh = days < 90;

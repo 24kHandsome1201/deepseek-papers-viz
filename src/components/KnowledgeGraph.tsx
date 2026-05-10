@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { PAPERS, Paper } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
 import { formatDate } from "@/lib/utils";
+import { getReferenceDate } from "@/lib/site";
 
 interface Props {
   activeTeams: Set<string>;
@@ -13,7 +14,6 @@ interface Props {
   selectedId: string | null;
 }
 
-const TODAY = new Date("2026-05-09");
 const ROW_H = 130;
 const NODE_R_FLAGSHIP = 22;
 const NODE_R = 8;
@@ -47,6 +47,7 @@ export default function KnowledgeGraph({
   } | null>(null);
 
   const layout = useMemo(() => {
+    const today = getReferenceDate();
     const visible = PAPERS.filter((p) => activeTeams.has(p.team));
     const teamIds = Array.from(activeTeams);
     const teamRow: Record<string, number> = {};
@@ -55,7 +56,7 @@ export default function KnowledgeGraph({
     // X axis = date
     const allDates = visible.map((p) => +new Date(p.date));
     const minDate = Math.min(...allDates, +new Date("2024-01-01"));
-    const maxDate = Math.max(...allDates, TODAY.getTime());
+    const maxDate = Math.max(...allDates, today.getTime());
     const span = maxDate - minDate || 1;
 
     const H = teamIds.length * ROW_H + PADDING_T + PADDING_B;
@@ -118,7 +119,7 @@ export default function KnowledgeGraph({
       }
     }
 
-    const todayX = xFor(TODAY.toISOString().slice(0, 10));
+    const todayX = xFor(today.toISOString().slice(0, 10));
 
     return {
       W,
@@ -130,6 +131,7 @@ export default function KnowledgeGraph({
       yearTicks,
       todayX,
       positions,
+      today,
     };
   }, [activeTeams]);
 
@@ -335,7 +337,7 @@ export default function KnowledgeGraph({
             : p.tier === "stub"
               ? NODE_R_STUB
               : NODE_R;
-          const days = (TODAY.getTime() - +new Date(p.date)) / 86400000;
+          const days = (layout.today.getTime() - +new Date(p.date)) / 86400000;
           const isFresh = days < 90;
           const dim = isDimmed(p.id);
           const sel = selectedId === p.id;

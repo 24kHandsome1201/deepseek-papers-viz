@@ -52,7 +52,7 @@ export default function HeroSection() {
           transition={{ duration: 0.6, delay: 0.12 }}
           className="mt-5 text-base md:text-lg text-[var(--foreground)]/80 leading-relaxed max-w-3xl"
         >
-          以 DeepSeek 主线为脉络，串联 Qwen / Kimi / GLM / 智谱 / 面壁等团队的开源工作。
+          以 DeepSeek 主线为脉络，串联 Qwen / Kimi / GLM / MiniCPM 等团队的开源工作。
           每个节点都是一篇论文，每条连线都是一次技术继承。
           <span className="text-white"> 双击任一节点</span>即可进入详情页，
           <span className="text-white">DeepSeek-R1 提供完整可玩的交互演示</span>。

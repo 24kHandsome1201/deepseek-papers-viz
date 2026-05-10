@@ -1,11 +1,26 @@
+import type { Metadata } from "next";
 import R1Hero from "@/components/r1/R1Hero";
 import R1Pipeline from "@/components/r1/R1Pipeline";
 import GRPODemo from "@/components/r1/GRPODemo";
 import ReasoningDemo from "@/components/r1/ReasoningDemo";
 import R1Benchmarks from "@/components/r1/R1Benchmarks";
 import R1Distillation from "@/components/r1/R1Distillation";
+import { paperById } from "@/data/papers";
+import { SITE_TITLE } from "@/lib/site";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+
+const r1Paper = paperById("deepseek-r1")!;
+
+export const metadata: Metadata = {
+  title: r1Paper.titleZh ?? "DeepSeek-R1",
+  description: r1Paper.summary,
+  openGraph: {
+    title: `${r1Paper.titleZh ?? "DeepSeek-R1"} · ${SITE_TITLE}`,
+    description: r1Paper.summary,
+    type: "article",
+  },
+};
 
 export default function DeepSeekR1Page() {
   return (

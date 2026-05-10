@@ -28,8 +28,8 @@ export const TEAMS: Record<string, Team> = {
     id: "kimi",
     name: "Kimi",
     nameEn: "Kimi / Moonshot",
-    color: "#1F1F1F",
-    accent: "#F2C94C",
+    color: "#F2C94C",
+    accent: "#FFE08A",
     org: "月之暗面",
   },
   glm: {

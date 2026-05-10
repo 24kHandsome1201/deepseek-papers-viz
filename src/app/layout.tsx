@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
@@ -14,9 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "中国开源模型论文图谱 · DeepSeek 主线",
-  description:
-    "可交互的中国开源大模型论文知识图谱，DeepSeek-R1 深度演示，含 MLA / MoE / GRPO / MTP 等核心技术拆解。",
+  title: {
+    default: SITE_TITLE,
+    template: `%s · ${SITE_TITLE}`,
+  },
+  description: SITE_DESCRIPTION,
 };
 
 export default function RootLayout({

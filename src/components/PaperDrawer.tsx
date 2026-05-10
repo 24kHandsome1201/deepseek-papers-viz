@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, ArrowRight } from "lucide-react";
+import { X, ExternalLink, ArrowRight, Box } from "lucide-react";
 import GithubIcon from "@/components/icons/GithubIcon";
 import { paperById } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
@@ -26,7 +26,7 @@ export default function PaperDrawer({ paperId, onClose }: Props) {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 480, opacity: 0 }}
           transition={{ type: "spring", damping: 28, stiffness: 220 }}
-          className="absolute right-4 top-4 bottom-4 w-[420px] z-40 rounded-2xl border border-[var(--border)] bg-[var(--panel)]/95 backdrop-blur-xl shadow-2xl flex flex-col scrollbar-thin overflow-hidden"
+          className="absolute inset-x-3 top-3 bottom-3 z-40 rounded-2xl border border-[var(--border)] bg-[var(--panel)]/95 backdrop-blur-xl shadow-2xl flex flex-col scrollbar-thin overflow-hidden sm:left-auto sm:right-4 sm:top-4 sm:bottom-4 sm:w-[min(420px,calc(100%-2rem))]"
         >
           <div
             className="px-5 pt-5 pb-4 border-b border-[var(--border)]"
@@ -137,6 +137,17 @@ export default function PaperDrawer({ paperId, onClose }: Props) {
                 >
                   <GithubIcon size={12} />
                   {paper.github}
+                </a>
+              )}
+              {paper.hf && (
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://huggingface.co/${paper.hf}`}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[var(--border)] hover:bg-white/5 transition"
+                >
+                  <Box size={12} />
+                  {paper.hf}
                 </a>
               )}
             </div>

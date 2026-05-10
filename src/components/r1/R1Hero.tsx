@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Box } from "lucide-react";
 import GithubIcon from "@/components/icons/GithubIcon";
 import { paperById } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
@@ -96,6 +96,17 @@ export default function R1Hero() {
             >
               <GithubIcon size={13} />
               {paper.github}
+            </a>
+          )}
+          {paper.hf && (
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href={`https://huggingface.co/${paper.hf}`}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[var(--border)] text-sm hover:bg-white/5 transition"
+            >
+              <Box size={13} />
+              {paper.hf}
             </a>
           )}
         </div>

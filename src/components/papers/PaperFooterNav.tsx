@@ -21,7 +21,7 @@ export default function PaperFooterNav({ currentId }: Props) {
 
   return (
     <footer className="border-t border-[var(--border)] mt-10">
-      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 gap-4">
+      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {prev ? (
           <Link
             href={`/paper/${prev.id}`}

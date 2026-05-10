@@ -21,7 +21,7 @@ const PRICING = [
   { name: "GPT-5.4", price: 18, color: "#34D399" },
   { name: "Gemini 2.5 Pro", price: 12, color: "#F59E0B" },
   { name: "Qwen3.6 Max", price: 6.4, color: "#A78BFA" },
-  { name: "Kimi K2.6", price: 5.2, color: "#1F1F1F" },
+  { name: "Kimi K2.6", price: 5.2, color: "#F2C94C" },
   { name: "DeepSeek V4", price: 3.48, color: "#4D6BFE", featured: true },
 ];
 
