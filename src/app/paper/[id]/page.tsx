@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, Sparkles, Box } from "lucide-react";
 import GithubIcon from "@/components/icons/GithubIcon";
 import { paperById, PAPERS } from "@/data/papers";
 import { TEAMS } from "@/data/teams";
+import { SITE_TITLE } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
 import { hasDemo } from "@/components/papers/demoRegistry";
 import PaperDeepView from "@/components/papers/PaperDeepView";
@@ -11,6 +13,24 @@ import PaperDeepView from "@/components/papers/PaperDeepView";
 export function generateStaticParams() {
   // exclude deepseek-r1 because it has its own dedicated page at /paper/deepseek-r1
   return PAPERS.filter((p) => p.id !== "deepseek-r1").map((p) => ({ id: p.id }));
+}
+
+export async function generateMetadata(
+  props: PageProps<"/paper/[id]">
+): Promise<Metadata> {
+  const { id } = await props.params;
+  const paper = paperById(id);
+  if (!paper) return {};
+
+  return {
+    title: paper.titleZh ?? paper.title,
+    description: paper.summary,
+    openGraph: {
+      title: `${paper.titleZh ?? paper.title} · ${SITE_TITLE}`,
+      description: paper.summary,
+      type: "article",
+    },
+  };
 }
 
 export default async function PaperPage(props: PageProps<"/paper/[id]">) {
@@ -24,12 +44,19 @@ export default async function PaperPage(props: PageProps<"/paper/[id]">) {
   const paper = paperById(id);
   if (!paper) notFound();
 
-  // If we have an interactive demo for this paper, render the deep view
-  if (hasDemo(paper.id)) {
+  // Render the rich deep view if this paper has either a bespoke demo or
+  // any structured deep-page section. Otherwise fall back to the simple stub.
+  const hasRichSections =
+    !!paper.pipeline?.length ||
+    !!paper.keyTechniques?.length ||
+    (paper.benchmarks?.length ?? 0) >= 3 ||
+    !!paper.insights?.length ||
+    !!paper.lineage?.length;
+
+  if (hasDemo(paper.id) || hasRichSections) {
     return <PaperDeepView paper={paper} />;
   }
 
-  // Otherwise fall back to the simple stub page
   const team = TEAMS[paper.team];
   return (
     <main className="min-h-screen">
@@ -101,6 +128,17 @@ export default async function PaperPage(props: PageProps<"/paper/[id]">) {
               >
                 <GithubIcon size={11} />
                 {paper.github}
+              </a>
+            )}
+            {paper.hf && (
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={`https://huggingface.co/${paper.hf}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--border)] hover:bg-white/5 transition text-xs"
+              >
+                <Box size={11} />
+                {paper.hf}
               </a>
             )}
           </div>

@@ -5,6 +5,11 @@ import { TEAMS } from "@/data/teams";
 import PaperHero from "@/components/papers/PaperHero";
 import PaperFooterNav from "@/components/papers/PaperFooterNav";
 import { PAPER_DEMOS } from "@/components/papers/demoRegistry";
+import PaperPipelineSection from "@/components/papers/sections/PaperPipelineSection";
+import PaperKeyTechniquesSection from "@/components/papers/sections/PaperKeyTechniquesSection";
+import PaperBenchmarksSection from "@/components/papers/sections/PaperBenchmarksSection";
+import PaperInsightsSection from "@/components/papers/sections/PaperInsightsSection";
+import PaperLineageSection from "@/components/papers/sections/PaperLineageSection";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -16,14 +21,75 @@ export default function PaperDeepView({ paper }: Props) {
   const Demo = PAPER_DEMOS[paper.id];
   const team = TEAMS[paper.team];
 
+  const hasPipeline = (paper.pipeline?.length ?? 0) > 0;
+  const hasTechniques = (paper.keyTechniques?.length ?? 0) > 0;
+  const hasBenchmarks = (paper.benchmarks?.length ?? 0) >= 3;
+  const hasInsights = (paper.insights?.length ?? 0) > 0;
+  const hasLineage = (paper.lineage?.length ?? 0) > 0;
+
   return (
     <main className="min-h-screen bg-background">
-      <PaperHero paper={paper} badge="Interactive Demo" />
+      <PaperHero
+        paper={paper}
+        badge={Demo ? "Interactive Demo" : "Deep Dive"}
+      />
+
+      {Demo ? (
+        <>
+          <Divider />
+          <Demo />
+        </>
+      ) : null}
+
+      {hasPipeline && (
+        <>
+          <Divider />
+          <PaperPipelineSection
+            stages={paper.pipeline!}
+            teamColor={team.color}
+          />
+        </>
+      )}
+
+      {hasTechniques && (
+        <>
+          <Divider />
+          <PaperKeyTechniquesSection
+            techniques={paper.keyTechniques!}
+            teamColor={team.color}
+          />
+        </>
+      )}
+
+      {hasBenchmarks && (
+        <>
+          <Divider />
+          <PaperBenchmarksSection
+            benchmarks={paper.benchmarks!}
+            teamColor={team.color}
+            modelName={paper.titleZh?.split(/[:：]/)[0] ?? paper.id}
+          />
+        </>
+      )}
+
+      {hasInsights && (
+        <>
+          <Divider />
+          <PaperInsightsSection
+            insights={paper.insights!}
+            teamColor={team.color}
+          />
+        </>
+      )}
+
+      {hasLineage && (
+        <>
+          <Divider />
+          <PaperLineageSection lineage={paper.lineage!} />
+        </>
+      )}
 
       <Divider />
-      {Demo ? <Demo /> : null}
-      <Divider />
-
       <ContextSection paper={paper} />
 
       {paper.team === "deepseek" && paper.id !== "deepseek-r1" && (
